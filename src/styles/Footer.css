@@ -1,0 +1,35 @@
+/* Footer Styling */
+.footer {
+  background-color: #ffffff; /* White background */
+  color: #333; /* Dark text for contrast */
+  text-align: center;
+  padding: 15px;
+  font-size: 14px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  border-top: 1px solid #ddd; /* Light border for separation */
+}
+
+/* Push content above footer */
+.main-content {
+  min-height: calc(100vh - 70px - 50px); /* Header + Footer space */
+  padding-bottom: 60px; /* Prevents overlap with footer */
+}
+
+/* Footer Links */
+.footer nav {
+  margin-top: 5px;
+}
+
+.footer nav a {
+  color: #f0f0f0; /* Light grey for contrast */
+  text-decoration: none;
+  margin: 0 10px;
+  font-size: 14px;
+}
+
+.footer nav a:hover {
+  text-decoration: underline;
+  color: #ace5ef; /* Highlight color on hover */
+}

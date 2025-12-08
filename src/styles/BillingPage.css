@@ -1,0 +1,459 @@
+/* ===== BillingPage.css ===== */
+
+.billing-container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+  font-family: "Times New Roman", sans-serif;
+  background: #fff;
+  border: 2px solid #ddd;
+}
+
+/* Header Section */
+.billing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #000000;
+  padding-bottom: 10px;
+  margin-bottom: 5px;
+}
+
+.billing-logo {
+  width: 150px;
+  height: auto;
+}
+
+.billing-company {
+  flex: 1;
+  margin-left: 10px;
+}
+
+.billing-company h1 {
+  margin: 0;
+  font-size: 10px;
+  font-weight: bold;
+  color: #000000;
+}
+
+.billing-company p {
+  margin: 3px 0;
+  font-size: 10px;
+  color: #000000;
+}
+
+/* ✅ Contact Section - Boxed Layout */
+.billing-contacts {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: 5px;
+  gap: 10px;
+}
+
+.billing-contacts div {
+  flex: 1;
+  min-width: 10px;
+  text-align: center;
+  border: 1px solid #000000;
+  padding: 3px 7px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: bold;
+  background: #fdfdfd;
+  line-height: 1.4;
+}
+
+/* Bill Metadata */
+.billing-meta {
+  display: flex;
+  justify-content: space-between;
+  margin: 15px 0;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.billing-title {
+  text-align: center;
+  text-decoration: underline;
+  font-size: 18px;
+  font-weight: bold;
+  margin: 15px 0;
+  color: #000000;
+}
+
+/* ✅ Customer + Bike Side by Side */
+.customer-bike-wrapper {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.billing-section {
+  flex: 1;
+  font-size: 14px;
+}
+
+.billing-section h3 {
+  margin-bottom: 6px;
+  color: #000000;
+  font-size: 15px;
+}
+
+.billing-section input,
+.billing-section select {
+  width: 100%;
+  padding: 8px;
+  margin: 6px 0;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* ✅ Bike Image */
+.bike-section {
+  flex: 1;
+  text-align: center;
+}
+
+.bike-upload {
+  margin-bottom: 8px;
+}
+
+.bike-img {
+  width: 150px;
+  max-width: 100%;
+  border: none;
+  background: transparent;
+}
+
+/* ✅ Vehicle + Finance + Summary Layout */
+.billing-details-wrapper {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+  margin-top: 20px;
+}
+
+/* Left Side (form inputs) */
+.billing-section {
+  flex: 2;
+}
+
+/* ✅ Redesigned Calculation Summary */
+.billing-summary {
+  flex: 1;
+  background: #fff;
+  border: 2px solid #000000;
+  padding: 15px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.6;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.billing-summary h3 {
+  text-align: center;
+  margin-bottom: 12px;
+  font-size: 15px;
+  font-weight: bold;
+  color: #000000;
+  text-transform: uppercase;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 6px;
+}
+
+/* ✅ EMI Breakdown Grid */
+.emi-breakdown-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.emi-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f9f9f9;
+}
+
+.emi-option.selected {
+  background: #e6f2ff;
+  border-color: #000000;
+  font-weight: bold;
+}
+
+.emi-months {
+  font-size: 13px;
+  color: #000000;
+}
+
+.emi-amount {
+  font-size: 13px;
+  font-weight: bold;
+  color: #000000;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 6px 0;
+  font-size: 14px;
+}
+
+.summary-label {
+  font-weight: bold;
+  color: #000000;
+}
+
+.summary-value {
+  font-weight: bold;
+  color: #000000;
+}
+
+/* Highlight Net Amount */
+.summary-row.net-amount .summary-value {
+  color: #000000;
+  font-size: 15px;
+}
+
+/* Highlight Final Total Row */
+.summary-row.total {
+  background: #fdf5cc;
+  padding: 6px;
+  border-radius: 4px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* Make summary sticky on scroll */
+.billing-summary.sticky {
+  position: sticky;
+  top: 20px;
+}
+
+/* ✅ Docs + Terms Side by Side Layout */
+.docs-terms-wrapper {
+  display: flex;
+  gap: 20px;
+  margin: 25px 0;
+  align-items: flex-start;
+}
+
+.billing-terms {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.billing-terms h3 {
+  font-size: 14px;
+  color: #000000;
+  margin-bottom: 5px;
+}
+
+.billing-terms ol {
+  margin-left: 18px;
+  padding: 0;
+}
+
+.billing-terms li {
+  margin-bottom: 4px;
+}
+
+/* ✅ Documentation Checklist */
+.billing-documents {
+  flex: 1;
+  font-size: 13px;
+}
+
+.billing-documents h3 {
+  font-size: 14px;
+  color: #000000;
+  margin-bottom: 8px;
+}
+
+.doc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f9f9f9;
+}
+
+.doc-grid label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.doc-grid input[type="checkbox"] {
+  margin: 0;
+  transform: scale(0.9);
+}
+
+/* Footer */
+.billing-footer {
+  margin-top: 40px;
+  text-align: right;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* Buttons */
+.billing-buttons {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.billing-btn {
+  background: #0047b3;
+  color: #fff;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.billing-btn:hover {
+  background: #003399;
+}
+
+.print-btn {
+  background: #00802b;
+}
+
+.print-btn:hover {
+  background: #006622;
+}
+
+.whatsapp-btn {
+  background: #25D366;
+}
+
+.whatsapp-btn:hover {
+  background: #128C7E;
+}
+
+/* Table */
+.bills-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  font-size: 13px;
+}
+
+.bills-table th,
+.bills-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+
+.bills-table th {
+  background: #003399;
+  color: white;
+}
+
+.bills-table tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+/* Search Bar */
+.search-bar {
+  margin: 10px 0;
+  padding: 8px 12px;
+  width: 100%;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #quotation,
+  #quotation * {
+    visibility: visible;
+  }
+
+  #quotation {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 20px;
+    background: white;
+  }
+
+  /* Hide non-print elements */
+  .no-print,
+  .billing-buttons,
+  .bills-table,
+  .search-bar,
+  .bike-upload,
+  .bike-section input {
+    display: none !important;
+  }
+
+  /* Prevent multi-page printing */
+  .bill-a4 {
+    page-break-after: avoid !important;
+    page-break-before: avoid !important;
+  }
+
+  /* Company Name */
+  .billing-company h1 {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: left;
+    color: #000 !important;
+  }
+
+  /* Bike Image */
+  .bike-img {
+    display: block;
+    margin: 10px auto;
+    width: 150px;
+    height: auto;
+  }
+
+  /* Summary box */
+  .billing-summary {
+    border: 1px solid #000;
+    background: #fff;
+    box-shadow: none;
+  }
+
+  /* Terms & Docs */
+  .docs-terms-wrapper {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+  }
+
+  .billing-terms,
+  .billing-documents {
+    flex: 1;
+  }
+
+  .doc-grid {
+    border: 1px solid #000;
+    background: #fff;
+  }
+  .doc-grid label {
+    font-size: 12px;
+  }
+}
