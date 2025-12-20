@@ -1,12 +1,16 @@
 /* ===== BillingPage.css ===== */
 
 .billing-container {
-  max-width: 900px;
-  margin: auto;
-  padding: 20px;
-  font-family: "Times New Roman", sans-serif;
-  background: #fff;
-  border: 2px solid #ddd;
+  max-width: 950px;
+  margin: 30px auto;
+  padding: 28px 35px;
+  font-family: "Georgia", "Garamond", "Times New Roman", serif;
+
+  background: #ffffff;
+  border: 1.8px solid #d6d6d6;
+  border-radius: 14px;
+
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
 /* Header Section */
@@ -14,20 +18,42 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid #000000;
-  padding-bottom: 10px;
-  margin-bottom: 5px;
+  border-bottom: 2px solid #111111;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
 }
 
+/* Logo */
 .billing-logo {
-  width: 150px;
+  width: 160px;
   height: auto;
 }
 
+/* Company Block */
 .billing-company {
   flex: 1;
-  margin-left: 10px;
+  margin-left: 18px;
 }
+
+/* Company Title */
+.billing-company h1 {
+  margin: 0;
+  font-size: 2rem !important;
+  font-weight: 800;
+  color: #111111;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Company Subtext (Address, Email, etc.) */
+.billing-company p {
+  margin: 2px 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #333333;
+  line-height: 1.4;
+}
+
 
 .billing-company h1 {
   margin: 0;
@@ -38,9 +64,12 @@
 
 .billing-company p {
   margin: 3px 0;
-  font-size: 10px;
-  color: #000000;
+  font-size: 13px;        /* Slightly bigger */
+  color: #000000;            /* Darker than #000000? */
+  font-weight: 600;       /* More professional and readable */
+  line-height: 1.4;
 }
+
 
 /* ✅ Contact Section - Boxed Layout */
 .billing-contacts {
@@ -63,6 +92,13 @@
   background: #fdfdfd;
   line-height: 1.4;
 }
+
+/* ⭐ NEW — Number will appear in next line */
+.billing-contacts div span {
+  display: block;
+}
+
+
 
 /* Bill Metadata */
 .billing-meta {
@@ -110,6 +146,25 @@
   border-radius: 4px;
   font-size: 14px;
 }
+.radio-group {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.radio-group input[type="radio"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
 
 /* ✅ Bike Image */
 .bike-section {
@@ -128,6 +183,35 @@
   background: transparent;
 }
 
+.vehicle-finance-box {
+  border: 2px solid #d1d1d1;
+  background: #f7faff;
+  padding: 18px 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.vehicle-finance-box h3 {
+  background: #e9eef5;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border-left: 4px solid #0047b3;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+/* Input Styling — same as 2nd screenshot */
+.vehicle-finance-box input,
+.vehicle-finance-box select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  font-size: 14px;
+  margin: 6px 0 14px 0;
+  background: #ffffff;
+}
 /* ✅ Vehicle + Finance + Summary Layout */
 .billing-details-wrapper {
   display: flex;
@@ -137,8 +221,17 @@
 }
 
 /* Left Side (form inputs) */
-.billing-section {
+/* .billing-section {
   flex: 2;
+} */
+.billing-section {
+  flex: 1;
+  min-width: 48%;
+}
+
+.billing-summary {
+  flex: 1;
+  min-width: 48%;
 }
 
 /* ✅ Redesigned Calculation Summary */
@@ -162,6 +255,32 @@
   text-transform: uppercase;
   border-bottom: 1px solid #ccc;
   padding-bottom: 6px;
+}
+
+/* Initial Payment in EMI Summary (Screen view) */
+.billing-summary .form-group.initial-payment {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fffbe6;
+  padding: 0;
+  margin-bottom: 10px;
+}
+
+.billing-summary .form-group.initial-payment .form-label {
+  border-right: 1px solid #ddd;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: bold;
+  background: #fffbe6;
+}
+
+.billing-summary .form-group.initial-payment input {
+  padding: 8px 10px;
+  border: none;
+  background: #fffbe6;
+  font-weight: bold;
 }
 
 /* ✅ EMI Breakdown Grid */
@@ -228,6 +347,19 @@
   border-radius: 4px;
   font-size: 20px;
   font-weight: bold;
+}
+
+/* Discount Box */
+.discount-box {
+  background: #ffe6e6;
+  border: 1px solid #ff6b6b;
+  padding: 10px 12px;
+  margin: 8px 0;
+  border-radius: 4px;
+  font-weight: bold;
+  text-align: center;
+  font-size: 14px;
+  color: #d32f2f;
 }
 
 /* Make summary sticky on scroll */
@@ -380,80 +512,505 @@
 }
 
 @media print {
-  body * {
-    visibility: hidden;
-  }
+  * {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
 
-  #quotation,
-  #quotation * {
-    visibility: visible;
-  }
-
-  #quotation {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    padding: 20px;
-    background: white;
-  }
-
-  /* Hide non-print elements */
-  .no-print,
-  .billing-buttons,
-  .bills-table,
-  .search-bar,
-  .bike-upload,
-  .bike-section input {
+ .sidebar,
+  .side-bar,
+  .app-sidebar,
+  .topbar,
+  .navbar,
+  .app-header,
+  header {
     display: none !important;
   }
 
-  /* Prevent multi-page printing */
+  /* Header visibility fix */
+  .billing-header,
+  .header-section {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Address wrap */
+  .billing-header p,
+  .billing-header span {
+    white-space: normal !important;
+    line-height: 1.3;
+  }
+
+  /* Page margins */
+  @page {
+    margin: 10mm;
+  }
+
+  body,
+  .billing-container {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+
+  body {
+    margin: 0;
+    font-family: "Georgia", "Garamond", "Times New Roman", serif;
+    background: white;
+    color: #000;
+  }
+
+  /* Hide non-print UI */
+  .no-print,
+  .menu-navigation,
+  .billing-buttons,
+  .search-bar {
+    display: none !important;
+  }
+
+  /* Main A4 container */
   .bill-a4 {
-    page-break-after: avoid !important;
-    page-break-before: avoid !important;
+    width: 210mm;
+    height: 60mm;
+    padding: 8mm 10mm;
+    margin: 0;
+    box-sizing: border-box;
+    background: white;
   }
 
-  /* Company Name */
-  .billing-company h1 {
-    font-size: 28px;
-    font-weight: bold;
-    text-align: left;
-    color: #000 !important;
+  /* Header */
+  .billing-header {
+    display: flex;
+    align-items: flex-start;
+    border-bottom: 2px solid #000;
+    padding-bottom: 4px;
+    margin-bottom: 5px;
+    gap: 8px;
   }
 
-  /* Bike Image */
-  .bike-img {
-    display: block;
-    margin: 10px auto;
-    width: 150px;
+  .billing-logo {
+    width: 180px;
     height: auto;
+    flex-shrink: 0;
+    margin-top: 20px;
   }
 
-  /* Summary box */
-  .billing-summary {
-    border: 1px solid #000;
+  .billing-company {
+    flex: 1;
+    margin-left: 0;
+  }
+
+  .billing-company h1 {
+    font-size: 18px;
+    margin: 2px 0;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .company-address {
+    font-size: 8px;
+    line-height: 1.3;
+    margin: 0 2px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline;
+  }
+
+  .email-highlight {
+    font-size: 10px;
+    text-align: center;
+    margin: 2px 0;
+  }
+
+  .billing-contacts {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 4px;
+    gap: 3px;
+  }
+
+  .billing-contacts div {
+    flex: 1;
+    font-size: 9px;
+    border: 0.5px solid #000;
+    padding: 3px 4px;
+    text-align: center;
+    background: white;
+    line-height: 1.3;
+  }
+
+  /* Meta info */
+  .billing-meta {
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 0;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .billing-title {
+    text-align: center;
+    font-size: 16px;
+    margin: 5px 0;
+    text-decoration: underline;
+    font-weight: bold;
+  }
+
+  /* Customer & Bike wrapper */
+  .customer-bike-wrapper {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1px;
+    align-items: flex-start;
+  }
+
+  .billing-section {
+    flex: 2;
+    font-size: 11px;
+  }
+
+  .billing-section h3 {
+    font-size: 12px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid #000;
+    padding-bottom: 2px;
+  }
+
+  .billing-section input,
+  .billing-section select {
+    width: 100%;
+    padding: 2px 3px;
+    margin: 2px 0 2px 0;
+    border: 0.5px solid #000;
+    font-size: 10px;
+    background: white;
+  }
+
+  .bike-section {
+    flex: 1;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .bike-img {
+    width: 180px;
+    height: 180px;
+    border: 0.5px solid #ddd;
+  }
+
+  /* Finance & Details wrapper */
+  .billing-details-wrapper {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 80px;
+    align-items: flex-start;
+  }
+
+  .vehicle-finance-box {
+  flex: 2;
+  border: 1px solid #000;
+  border-collapse: collapse;
+  padding: 0;
+  background: white;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 280px;
+}
+
+
+  .vehicle-finance-box h3 {
+  font-size: 12px;
+  margin: 0;
+  border-bottom: 1px solid #000;
+  padding: 8px 10px;
+  background: white;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+  .vehicle-finance-box input,
+  .vehicle-finance-box select {
+    width: 100%;
+    padding: 8px 10px;
+    margin: 0;
+    border: none;
+    font-size: 10px;
+    background: white;
+    text-align: right;
+    box-sizing: border-box;
+    color: #333;
+  }
+
+ .form-group {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid #000;
+  align-items: stretch;
+  position: relative;
+  width: 100%;
+}
+
+.form-group.no-divider {
+  border-bottom: none !important;
+}
+
+/* ✅ Start table line from Vehicle Cost */
+/* ❌ No divider under Vehicle Name */
+.form-group.no-divider {
+  border-bottom: none !important;
+}
+
+/* ✅ Restore divider under Vehicle Cost row */
+.form-group.no-divider + .form-group {
+  border-bottom: 1px solid #000;
+}
+
+
+ .vehicle-finance-box .form-group {
+  border-bottom: 1px solid #000;
+ }
+
+
+  .form-group:last-of-type {
+    border-bottom: 1px solid #000;
+  }
+
+  .form-label {
+  display: block;
+  font-size: 10px;
+  font-weight: bold;
+  margin: 0;
+  padding: 8px 10px;
+  border-right: 1px solid #000;
+  background: white;
+  box-sizing: border-box;
+  color: #333;
+}
+
+  /* Total Cost Row Styling */
+  .form-group.total-row {
+  background: white;
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #000;
+}
+
+  .form-group.total-row .form-label,
+  .form-group.total-row input {
+    font-weight: bold;
+    background: white;
+  }
+
+  .form-group.total-row .form-label {
+    border-right: 1px solid #000;
+  }
+
+  /* Initial Payment Section */
+  .form-group.initial-payment {
+    border-top: 1px solid #000;
+    background: #fffbe6;
+  }
+
+  .form-group.initial-payment .form-label,
+  .form-group.initial-payment input {
+    background: #fffbe6;
+    font-weight: bold;
+  }
+
+  .form-group.initial-payment .form-label {
+    border-right: 1px solid #ccc;
+  }
+
+  /* .total-cost-box {
     background: #fff;
-    box-shadow: none;
+    border: 0.5px solid #000;
+    padding: 6px;
+    margin: 6px 0;
+    font-weight: bold;
+    text-align: center;
+    font-size: 12px;
   }
 
-  /* Terms & Docs */
+  .discount-box {
+    background: #fff;
+    border: 0.5px solid #000;
+    padding: 5px;
+    margin: 5px 0;
+    font-weight: bold;
+    text-align: center;
+    font-size: 11px;
+  } */
+
+  /* EMI Summary */
+  .billing-summary {
+    flex: 1;
+    border: 1px solid #000;
+    border-collapse: collapse;
+    padding: 0;
+    background: white;
+    margin-bottom: 0;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .billing-summary h3 {
+    font-size: 12px;
+    text-align: center;
+    margin: 0;
+    border-bottom: 1px solid #000;
+    padding: 8px 10px;
+    text-transform: uppercase;
+    background: white;
+  }
+
+  /* Initial Payment in EMI Summary for Print */
+  .billing-summary .form-group.initial-payment {
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid #000;
+    background: white;
+  }
+
+  .billing-summary .form-group.initial-payment .form-label,
+  .billing-summary .form-group.initial-payment input {
+    background: white;
+    font-weight: bold;
+    padding: 8px 10px;
+  }
+
+  .billing-summary .form-group.initial-payment .form-label {
+    border-right: 1px solid #000;
+  }
+
+  .emi-breakdown-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .emi-option {
+    border: none;
+    border-bottom: 1px solid #000;
+    padding: 8px 10px;
+    text-align: center;
+    background: white;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+  }
+
+  .emi-option:last-child {
+    border-bottom: none;
+  }
+
+  .emi-months {
+    font-size: 10px;
+    font-weight: normal;
+    text-align: left;
+  }
+
+  .emi-amount {
+    font-size: 10px;
+    font-weight: bold;
+  }
+
+  /* Terms & Docs Wrapper */
   .docs-terms-wrapper {
     display: flex;
     gap: 10px;
-    margin: 20px 0;
+    margin-bottom: 10px;
+    align-items: flex-start;
   }
 
-  .billing-terms,
+  .billing-terms {
+    flex: 1;
+    border: 0.5px solid #000;
+    padding: 8px;
+    font-size: 10px;
+  }
+
+  .billing-terms h3 {
+    font-size: 11px;
+    margin-bottom: 4px;
+    border-bottom: 0.5px solid #000;
+    padding-bottom: 3px;
+  }
+
+  .billing-terms ol {
+    margin-left: 16px;
+    padding: 0;
+  }
+
+  .billing-terms li {
+    margin-bottom: 2px;
+    line-height: 1.3;
+  }
+
+  /* Documentation Checklist */
   .billing-documents {
     flex: 1;
+    border: 0.5px solid #000;
+    padding: 8px;
+  }
+
+  .billing-documents h3 {
+    font-size: 11px;
+    margin-bottom: 5px;
+    border-bottom: 0.5px solid #000;
+    padding-bottom: 3px;
   }
 
   .doc-grid {
-    border: 1px solid #000;
-    background: #fff;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 0;
+    border: none;
+    background: white;
   }
+
   .doc-grid label {
-    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 9px;
+  }
+
+  .doc-grid input[type="checkbox"] {
+    margin: 0;
+    width: 12px;
+    height: 12px;
+  }
+
+  /* Footer */
+  .billing-footer {
+    margin-top: 15px;
+    text-align: right;
+    font-weight: bold;
+    font-size: 11px;
+    border-top: 0.5px solid #000;
+    padding-top: 8px;
+  }
+
+  /* Print container */
+  .billing-container {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+    background: white;
   }
 }

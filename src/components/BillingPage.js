@@ -20,6 +20,7 @@ const BillingPage = () => {
     documentationCharges: "",
     initial: "",
     rateOfInterest: "",
+    discount: "",
     totalCost: "",
     rtoCost: "",
     documentation: {
@@ -54,7 +55,7 @@ const BillingPage = () => {
     try {
       const response = await axios.get("http://localhost:5000/api/vehicles");
       const vehiclesData = response.data.vehicles || [];
-      
+
       // Convert array to the required object structure
       const vehiclesObj = {};
       vehiclesData.forEach(vehicle => {
@@ -63,7 +64,7 @@ const BillingPage = () => {
         }
         vehiclesObj[vehicle.brand][vehicle.model] = vehicle.price;
       });
-      
+
       setVehicles(vehiclesObj);
     } catch (error) {
       console.error("Error fetching vehicles:", error);
@@ -100,7 +101,7 @@ const BillingPage = () => {
 
     const highestNumber = Math.max(...billNumbers);
     const nextNumber = highestNumber + 1;
-    
+
     return `RB-${nextNumber.toString().padStart(2, '0')}`;
   };
 
@@ -114,7 +115,7 @@ const BillingPage = () => {
     try {
       const res = await axios.get("http://localhost:5000/api/billing");
       setBills(res.data.bills || []);
-      
+
       const nextBillNo = generateNextBillNo(res.data.bills || []);
       setBillNo(nextBillNo);
     } catch (err) {
@@ -144,8 +145,8 @@ const BillingPage = () => {
     }
 
     if (name === "vehicleBrand" && !useManualEntry) {
-      setFormData((prev) => ({ 
-        ...prev, 
+      setFormData((prev) => ({
+        ...prev,
         vehicleBrand: value,
         vehicleName: "",
         vehicleCost: ""
@@ -174,16 +175,34 @@ const BillingPage = () => {
   };
 
   const calculateEMI = (balance, months, rate, documentationCharges) => {
-    const years = months / 12;
-    const totalInterest = balance * (rate / 100) * years;
-    const total = balance + totalInterest + documentationCharges;
-    const emi = total / months;
-    return parseFloat(emi.toFixed(2));
+    // Convert annual rate to monthly rate
+    const monthlyRate = rate / 100 / 12;
+
+    // Handle edge case: if interest rate is 0
+    if (monthlyRate === 0) {
+      return parseFloat(((balance + documentationCharges) / months).toFixed(2));
+    }
+
+    // Standard EMI formula: P * r * (1+r)^n / ((1+r)^n - 1)
+    const emi = balance * monthlyRate * Math.pow(1 + monthlyRate, months) /
+      (Math.pow(1 + monthlyRate, months) - 1);
+
+    // Add documentation charges proportionally
+    const totalEMI = emi + (documentationCharges / months);
+
+    return parseFloat(totalEMI.toFixed(2));
+  };
+
+  const calculateDiscount = (totalCost, discountPercentage) => {
+    // Apply percentage discount and ensure cost doesn't go negative
+    const discountAmount = (totalCost * discountPercentage) / 100;
+    const discountedCost = Math.max(0, totalCost - discountAmount);
+    return parseFloat(discountedCost.toFixed(2));
   };
 
   const calculateValues = () => {
-    const vehicleCost = useManualEntry 
-      ? parseFloat(formData.manualVehicleCost) || 0 
+    const vehicleCost = useManualEntry
+      ? parseFloat(formData.manualVehicleCost) || 0
       : parseFloat(formData.vehicleCost) || 0;
 
     const fittingCost = parseFloat(formData.fittingCost) || 0;
@@ -191,14 +210,20 @@ const BillingPage = () => {
     const documentationCharges = parseFloat(formData.documentationCharges) || 0;
     const initial = parseFloat(formData.initial) || 0;
     const rate = parseFloat(formData.rateOfInterest) || 0;
+    const discount = parseFloat(formData.discount) || 0;
 
-    // Step 1: Total cost
-    const totalCost = vehicleCost + rtoCost + fittingCost;
+    // Step 1: Total cost before discount
+    let totalCost = vehicleCost + rtoCost + fittingCost;
 
-    // Step 2: Balance after initial payment
+    // Step 2: Apply discount if present
+    if (discount > 0) {
+      totalCost = calculateDiscount(totalCost, discount);
+    }
+
+    // Step 3: Balance after initial payment
     const balance = Math.max(0, totalCost - initial);
 
-    // Step 3: EMI breakdown for different tenures
+    // Step 4: EMI breakdown for different tenures
     const emiBreakdown = {
       12: calculateEMI(balance, 12, rate, documentationCharges),
       18: calculateEMI(balance, 18, rate, documentationCharges),
@@ -207,11 +232,12 @@ const BillingPage = () => {
       36: calculateEMI(balance, 36, rate, documentationCharges)
     };
 
-    // Step 4: Return safely
+    // Step 5: Return safely
     return {
       totalCost: parseFloat(totalCost.toFixed(2)),
       balance: parseFloat(balance.toFixed(2)),
       rate: parseFloat(rate.toFixed(2)),
+      discount: parseFloat(discount.toFixed(2)),
       documentationCharges: parseFloat(documentationCharges.toFixed(2)),
       emiBreakdown
     };
@@ -251,8 +277,8 @@ const BillingPage = () => {
       return;
     }
 
-    const { totalCost, balance, emiBreakdown, documentationCharges } = calculateValues();
-    
+    const { totalCost, balance, emiBreakdown, documentationCharges, discount } = calculateValues();
+
     const vehicleName = useManualEntry ? formData.manualVehicleName : formData.vehicleName;
     const vehicleCost = useManualEntry ? parseFloat(formData.manualVehicleCost) || 0 : parseFloat(formData.vehicleCost) || 0;
     const vehicleBrand = useManualEntry ? "Other" : formData.vehicleBrand;
@@ -269,6 +295,7 @@ const BillingPage = () => {
       fittingCost: parseFloat(formData.fittingCost) || 0,
       rtoCost: parseFloat(formData.rtoCost) || 0,
       documentationCharges: documentationCharges,
+      discount: discount,
       totalCost: totalCost,
       initial: parseFloat(formData.initial) || 0,
       balance: balance,
@@ -287,7 +314,7 @@ const BillingPage = () => {
       } else {
         await axios.post("http://localhost:5000/api/billing", billData);
         alert("✅ New Quotation Created");
-        
+
         const nextBillNo = generateNextBillNo([...bills, billData]);
         setBillNo(nextBillNo);
       }
@@ -314,12 +341,12 @@ const BillingPage = () => {
       };
 
       await axios.post("http://localhost:5000/api/booked-vehicles", bookedVehicleData);
-      
+
       // Remove the quotation from the bills list after marking as booked
       await axios.delete(`http://localhost:5000/api/billing/${bill.id}`);
-      
+
       alert("✅ Vehicle marked as booked and quotation removed");
-      
+
       // Refresh both lists
       fetchBills();
       fetchBookedVehicles();
@@ -360,7 +387,7 @@ const BillingPage = () => {
   const handleEdit = (bill) => {
     let vehicleBrand = "";
     let useManual = true;
-    
+
     // Check if vehicle exists in our database
     for (const brand in vehicles) {
       if (vehicles[brand][bill.vehicleName]) {
@@ -538,14 +565,14 @@ const BillingPage = () => {
                   <button onClick={() => handleView(bill)} className="action-btn view-btn">
                     🔄
                   </button>
-                  <button 
-                    onClick={() => handleMarkAsBooked(bill)} 
+                  <button
+                    onClick={() => handleMarkAsBooked(bill)}
                     className="billing-btn booked-btn"
                   >
-                    ✅ 
+                    ✅
                   </button>
-                  <button 
-                    onClick={() => handleDelete(bill.id)} 
+                  <button
+                    onClick={() => handleDelete(bill.id)}
                     className="billing-btn delete-btn"
                   >
                     🗑
@@ -594,13 +621,13 @@ const BillingPage = () => {
               <td>{vehicle.bookingDate || vehicle.date}</td>
               <td>
                 <button onClick={() => handleViewBooked(vehicle)} className="action-btn view-btn">
-                  🔄 
+                  🔄
                 </button>
-                <button 
-                  onClick={() => handleDeleteBooked(vehicle.id)} 
+                <button
+                  onClick={() => handleDeleteBooked(vehicle.id)}
                   className="billing-btn delete-btn"
                 >
-                  🗑 
+                  🗑
                 </button>
               </td>
             </tr>
@@ -613,13 +640,14 @@ const BillingPage = () => {
   return (
     <div className="billing-container">
       <div className="menu-navigation">
-        <button 
+        <button
           className={`menu-btn ${activeMenu === "quotations" ? "active" : ""}`}
           onClick={() => setActiveMenu("quotations")}
         >
           📋 Quotations
         </button>
-        <button 
+
+        <button
           className={`menu-btn ${activeMenu === "booked" ? "active" : ""}`}
           onClick={() => setActiveMenu("booked")}
         >
@@ -635,305 +663,379 @@ const BillingPage = () => {
         <>
           <div id="quotation" className="bill-a4" ref={quotationRef}>
             <div className="billing-header">
-              <img src={logo} alt="Royal Bikes Logo" className="billing-logo" />
+
+              {/* Darkened Logo */}
+              <img src={logo} alt="Royal Bikes Logo" className="billing-logo logo-dark" />
+
+              {/* Company Details */}
               <div className="billing-company">
                 <h1>ROYAL BIKES</h1>
-                <p>104/1, Erukkanchery High Road, Sharma Nagar, Vyasarpadi</p>
-                <p>Chennai - 600039 (Annai Digital Opposite), ★📍★ No 52 Bharathiyar street,Manali,Chennai-600068(Near SRF School)</p>
-                <p>Email: royalbikes2021@gmail.com</p>
-                <div className="billing-contacts">
-                  <div>📞Sales(1) 6369308779</div>
-                  <div>📞Sales(2) 7550241681</div>
-                  <div>📞RTO 8925270575</div>
-                  <div>📞CustomerCare 9677037270</div>
+
+                <p className="company-address">
+                  ★📍★ 104/1, Erukkanchery High Road, Sharma Nagar, Vyasarpadi, Chennai - 600039 (Annai Digital Opposite)
+                </p>
+                <div></div>
+                <p className="company-address">
+                  ★📍★ No 52 Bharathiyar Street, Manali, Chennai - 600068 (Near SRF School)
+                </p>
+                <p className="email-highlight">
+                  ✉️ <strong>royalbikes2021@gmail.com</strong>
+                </p>
+                {/* Contact Numbers */}
+                <div className="billing-contacts modern-contact">
+                  <div><span>📞 Sales 1:</span> 6369308779</div>
+                  <div><span>📞 Sales 2:</span> 7550241681</div>
+                  <div><span>📞 RTO:</span> 8925270575</div>
+                  <div><span>📞 Customer Care:</span> 9677037270</div>
                 </div>
+
               </div>
             </div>
+          </div>
 
-            <div className="billing-meta">
-              <p>
-                <strong>Bill No:</strong> {billNo}
-              </p>
-              <p>
-                <strong>Date:</strong> {today}
-              </p>
+
+          <div className="billing-meta">
+            <p>
+              <strong>Bill No:</strong> {billNo}
+            </p>
+            <p>
+              <strong>Date:</strong> {today}
+            </p>
+          </div>
+
+          <h2 className="billing-title">VEHICLE QUOTATION</h2>
+
+          <div className="customer-bike-wrapper">
+            <div className="billing-section">
+              <h3>Customer Details</h3>
+              <input
+                name="customer_name"
+                placeholder="Name *"
+                value={formData.customer_name}
+                onChange={handleChange}
+                required
+              />
+              <input
+                name="address"
+                placeholder="Address"
+                value={formData.address}
+                onChange={handleChange}
+              />
+
+              <input
+                name="phone"
+                placeholder="Phone"
+                value={formData.phone}
+                onChange={handleChange}
+              />
             </div>
 
-            <h2 className="billing-title">QUOTATION</h2>
-
-            <div className="customer-bike-wrapper">
-              <div className="billing-section">
-                <h3>Customer Details</h3>
-                <input
-                  name="customer_name"
-                  placeholder="Name *"
-                  value={formData.customer_name}
-                  onChange={handleChange}
-                  required
-                />
-                <input
-                  name="address"
-                  placeholder="Address"
-                  value={formData.address}
-                  onChange={handleChange}
-                />
-                
-                <input
-                  name="phone"
-                  placeholder="Phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="bike-section">
-                <img src={defaultBikeImage} alt="Default Bike" className="bike-img" />
-              </div>
+            <div className="bike-section">
+              <img src={defaultBikeImage} alt="Default Bike" className="bike-img" />
             </div>
+          </div>
 
-            <div className="billing-details-wrapper">
-              <div className="billing-section">
-                <h3>Vehicle & Finance Details</h3>
+          <div className="billing-details-wrapper">
+            <div className="vehicle-finance-box">
+              <h3>Vehicle & Finance Details</h3>
 
-                <div className="no-print">
-                  <label>
+              <div className="no-print" style={{ marginBottom: 12 }}>
+                <div className="radio-group">
+                  <label style={{ marginRight: 12 }}>
                     <input
                       type="radio"
                       checked={!useManualEntry}
                       onChange={() => setUseManualEntry(false)}
                     />{" "}
-                    Select from List
+                    <span style={{ marginLeft: 6 }}>Select from List</span>
                   </label>
-                  <label style={{ marginLeft: '15px' }}>
+
+                  <label>
                     <input
                       type="radio"
                       checked={useManualEntry}
                       onChange={() => setUseManualEntry(true)}
                     />{" "}
-                    Manual Entry
+                    <span style={{ marginLeft: 6 }}>Manual Entry</span>
                   </label>
                 </div>
+              </div>
 
-                {!useManualEntry ? (
-                  <>
-                    <div className="no-print">
-                      <label>
-                        Vehicle Brand:
-                        <select
-                          name="vehicleBrand"
-                          value={formData.vehicleBrand}
-                          onChange={handleChange}
-                          required
-                        >
-                          <option value="">Select Brand *</option>
-                          {Object.keys(vehicles).map((brand) => (
-                            <option key={brand} value={brand}>
-                              {brand}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
+              {/* Vehicle selection / manual inputs */}
+              {!useManualEntry ? (
+                <>
+                  <div className="form-group">
+                    <label className="form-label">Vehicle Brand:</label>
+                    <select
+                      name="vehicleBrand"
+                      className="form-input"
+                      value={formData.vehicleBrand}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select Brand *</option>
+                      {Object.keys(vehicles).map((brand) => (
+                        <option key={brand} value={brand}>
+                          {brand}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {formData.vehicleBrand && (
+                    <div className="form-group no-divider">
+  <label className="form-label">Vehicle Model:</label>
+  <select
+    name="vehicleName"
+    className="form-input"
+    value={formData.vehicleName}
+    onChange={handleChange}
+  >
+
+                        <option value="">Select Model *</option>
+                        {Object.keys(vehicles[formData.vehicleBrand] || {}).map((model) => (
+                          <option key={model} value={model}>
+                            {model}
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                    
-                    {formData.vehicleBrand && (
-                      <label>
-                        Vehicle Model:
-                        <select
-                          name="vehicleName"
-                          value={formData.vehicleName}
-                          onChange={handleChange}
-                          required
-                        >
-                          <option value="">Select Model *</option>
-                          {Object.keys(vehicles[formData.vehicleBrand] || {}).map((model) => (
-                            <option key={model} value={model}>
-                              {model}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                    )}
+                  )}
 
-                    <label>
-                      Vehicle Cost:
-                      <input
-                        name="vehicleCost"
-                        type="number"
-                        value={formData.vehicleCost}
-                        readOnly
-                      />
-                    </label>
-                  </>
-                ) : (
-                  <>
-                    <label>
-                      Vehicle Name:
-                      <input
-                        name="manualVehicleName"
-                        type="text"
-                        placeholder="Enter vehicle name *"
-                        value={formData.manualVehicleName}
-                        onChange={handleChange}
-                        required
-                      />
-                    </label>
-
-                    <label>
-                      Vehicle Cost:
-                      <input
-                        name="manualVehicleCost"
-                        type="number"
-                        placeholder="Enter vehicle cost *"
-                        value={formData.manualVehicleCost}
-                        onChange={handleChange}
-                        min="0"
-                        step="0.01"
-                        required
-                      />
-                    </label>
-                  </>
-                )}
-
-                <label>
-                  Fitting Cost:
-                  <input
-                    name="fittingCost"
-                    type="number"
-                    value={formData.fittingCost}
-                    onChange={handleChange}
-                    min="0"
-                    step="0.01"
-                  />
-                </label>
-                               
-                  <label>
-                    RTO Cost:
+                  <div className="form-group">
+                    <label className="form-label">Vehicle Cost:</label>
                     <input
-                      name="rtoCost"
+                      name="vehicleCost"
                       type="number"
-                      value={formData.rtoCost}
+                      className="form-input"
+                      value={formData.vehicleCost}
+                      readOnly
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="form-group no-divider">
+  <label className="form-label">Vehicle Name:</label>
+  <input
+    name="manualVehicleName"
+    type="text"
+    className="form-input"
+    value={formData.manualVehicleName}
+    onChange={handleChange}
+  />
+</div>
+
+
+                  <div className="form-group">
+                    <label className="form-label">Vehicle Cost:</label>
+                    <input
+                      name="manualVehicleCost"
+                      type="number"
+                      className="form-input"
+                      placeholder="Enter vehicle cost *"
+                      value={formData.manualVehicleCost}
                       onChange={handleChange}
                       min="0"
                       step="0.01"
                     />
-                  </label>
-                
-                <label>
-                  Total Cost:
-                  <input
-                    name="totalCost"
-                    type="number"
-                    value={totalCost}
-                    readOnly
-                  />
-                </label>
+                  </div>
+                </>
+              )}
 
-                <label>
-                  Initial Payment:
+              <div className="form-group">
+                <label className="form-label">Fitting Cost:</label>
+                <input
+                  name="fittingCost"
+                  type="number"
+                  className="form-input"
+                  value={formData.fittingCost}
+                  onChange={handleChange}
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">RTO Cost:</label>
+                <input
+                  name="rtoCost"
+                  type="number"
+                  className="form-input"
+                  value={formData.rtoCost}
+                  onChange={handleChange}
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+
+                <div className="form-group total-row">
+                  <label className="form-label">
+                    Total Cost:
+                  </label>
                   <input
-                    name="initial"
+                    type="text"
+                    readOnly
+                    value={`₹${(
+                      parseFloat(formData.vehicleCost || formData.manualVehicleCost || 0) +
+                      parseFloat(formData.fittingCost || 0) +
+                      parseFloat(formData.rtoCost || 0)
+                    ).toLocaleString()}`}
+                  />
+                </div>
+
+                {parseFloat(formData.discount || 0) > 0 && (
+                  <div className="form-group total-row">
+                    <label className="form-label">Discount:</label>
+                    <input
+                      type="text"
+                      readOnly
+                      value={`- ₹${parseFloat(formData.discount).toLocaleString()}`}
+                    />
+                  </div>
+                )}
+
+                <div className="form-group total-row">
+                  <label className="form-label">Final Total Cost:</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={`₹${(
+                      (
+                        parseFloat(formData.vehicleCost || formData.manualVehicleCost || 0) +
+                        parseFloat(formData.fittingCost || 0) +
+                        parseFloat(formData.rtoCost || 0)
+                      ) -
+                      parseFloat(formData.discount || 0)
+                    ).toLocaleString()}`}
+                  />
+                </div>
+
+
+
+
+              <div className="no-print">
+                <div className="form-group">
+                  <label className="form-label">Rate of Interest (% per annum):</label>
+                  <input
+                    name="rateOfInterest"
                     type="number"
-                    value={formData.initial}
+                    className="form-input"
+                    value={formData.rateOfInterest}
                     onChange={handleChange}
                     min="0"
-                    step="0.01"
+                    step="0.1"
                   />
-                </label>
-
-                <div className="no-print">
-                  <label>
-                    Rate of Interest (% per annum):
-                    <input
-                      name="rateOfInterest"
-                      type="number"
-                      value={formData.rateOfInterest}
-                      onChange={handleChange}
-                      min="0"
-                      step="0.1"
-                    />
-                  </label>
                 </div>
-                <div className="no-print">
-                <label>
-                  Documentation Charges:
+
+                <div className="form-group">
+                  <label className="form-label">Documentation Charges:</label>
                   <input
                     name="documentationCharges"
                     type="number"
+                    className="form-input"
                     value={formData.documentationCharges}
                     onChange={handleChange}
                     min="0"
                     step="0.01"
                     placeholder="Enter document charges"
                   />
-                </label>
                 </div>
-
-              </div>
-
-              <div className="billing-summary">
-                <h3>EMI Summary</h3>
-                <div className="emi-breakdown-grid">
-                  <div className="emi-option">
-                    <div className="emi-months">12 Months</div>
-                    <div className="emi-amount">₹{emiBreakdown[12]?.toFixed(2)}</div>
-                  </div>
-                  <div className="emi-option">
-                    <div className="emi-months">18 Months</div>
-                    <div className="emi-amount">₹{emiBreakdown[18]?.toFixed(2)}</div>
-                  </div>
-                  <div className="emi-option">
-                    <div className="emi-months">24 Months</div>
-                    <div className="emi-amount">₹{emiBreakdown[24]?.toFixed(2)}</div>
-                  </div>
-                  <div className="emi-option">
-                    <div className="emi-months">30 Months</div>
-                    <div className="emi-amount">₹{emiBreakdown[30]?.toFixed(2)}</div>
-                  </div>
-                  <div className="emi-option">
-                    <div className="emi-months">36 Months</div>
-                    <div className="emi-amount">₹{emiBreakdown[36]?.toFixed(2)}</div>
-                  </div>
-                </div>
-                
-              </div>
-            </div>
-
-            <div className="docs-terms-wrapper">
-              <div className="billing-terms">
-                <h3>TERMS & CONDITIONS :</h3>
-                <ol>
-                  <li>Cheque/DD to be on Royal Bikes Payable at Chennai.</li>
-                  <li>The Price is Subject to Change without period notice.</li>
-                  <li>
-                    Vehicle delivery within 2–3 days after payment.   
-                  </li>
-                  <li>Cheque payments are subject to clearance before delivery.</li>
-                </ol>
-              </div>
-
-              <div className="billing-documents">
-                <h3>Documentation Checklist</h3>
-                <div className="doc-grid">
-                  {documentationChecklist.map((doc) => (
-                    <label key={doc.key}>
-                      <input
-                        type="checkbox"
-                        name={doc.key}
-                        checked={formData.documentation[doc.key]}
-                        onChange={handleChange}
-                      />{" "}
-                      {doc.label}
-                    </label>
-                  ))}
+                <div className="form-group">
+                  <label className="form-label">Discount (%):</label>
+                  <input
+                    name="discount"
+                    type="number"
+                    className="form-input"
+                    value={formData.discount}
+                    onChange={handleChange}
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    placeholder="Enter discount percentage"
+                  />
                 </div>
               </div>
             </div>
 
-            <div className="billing-footer">
-              <p>For ROYAL BIKES</p>
+
+            <div className="billing-summary">
+              <h3>EMI Summary</h3>
               
+              <div className="form-group initial-payment">
+                <label className="form-label">Initial Payment:</label>
+                <input
+                  name="initial"
+                  type="number"
+                  className="form-input"
+                  value={formData.initial}
+                  onChange={handleChange}
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+              
+              <div className="emi-breakdown-grid">
+                <div className="emi-option">
+                  <div className="emi-months">12 Months</div>
+                  <div className="emi-amount">₹{emiBreakdown[12]?.toFixed(2)}</div>
+                </div>
+                <div className="emi-option">
+                  <div className="emi-months">18 Months</div>
+                  <div className="emi-amount">₹{emiBreakdown[18]?.toFixed(2)}</div>
+                </div>
+                <div className="emi-option">
+                  <div className="emi-months">24 Months</div>
+                  <div className="emi-amount">₹{emiBreakdown[24]?.toFixed(2)}</div>
+                </div>
+                <div className="emi-option">
+                  <div className="emi-months">30 Months</div>
+                  <div className="emi-amount">₹{emiBreakdown[30]?.toFixed(2)}</div>
+                </div>
+                <div className="emi-option">
+                  <div className="emi-months">36 Months</div>
+                  <div className="emi-amount">₹{emiBreakdown[36]?.toFixed(2)}</div>
+                </div>
+              </div>
+
             </div>
           </div>
+
+          <div className="docs-terms-wrapper">
+            <div className="billing-terms">
+              <h3>TERMS & CONDITIONS :</h3>
+              <ol>
+                <li>Cheque/DD to be on Royal Bikes Payable at Chennai.</li>
+                <li>The Price is Subject to Change without period notice.</li>
+                <li>
+                  Vehicle delivery within 2–3 days after payment.
+                </li>
+                <li>Cheque payments are subject to clearance before delivery.</li>
+              </ol>
+            </div>
+
+            <div className="billing-documents">
+              <h3>Documentation Checklist</h3>
+              <div className="doc-grid">
+                {documentationChecklist.map((doc) => (
+                  <label key={doc.key}>
+                    <input
+                      type="checkbox"
+                      name={doc.key}
+                      checked={formData.documentation[doc.key]}
+                      onChange={handleChange}
+                    />{" "}
+                    {doc.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="billing-footer">
+            <p>For ROYAL BIKES</p>
+
+          </div>
+
 
           <div className="billing-buttons no-print">
             <button onClick={handleSave} className="billing-btn save-btn">
