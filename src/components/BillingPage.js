@@ -801,16 +801,17 @@ const BillingPage = () => {
                     </div>
                   )}
 
-                  <div className="form-group">
-                    <label className="form-label">Vehicle Cost:</label>
-                    <input
-                      name="vehicleCost"
-                      type="number"
-                      className="form-input"
-                      value={formData.vehicleCost}
-                      readOnly
-                    />
-                  </div>
+                  <div className="form-group cost-row">
+  <label className="form-label">Vehicle Cost:</label>
+  <input
+    name="vehicleCost"
+    type="number"
+    className="form-input"
+    value={formData.vehicleCost}
+    readOnly
+  />
+</div>
+
                 </>
               ) : (
                 <>
@@ -826,19 +827,17 @@ const BillingPage = () => {
 </div>
 
 
-                  <div className="form-group">
-                    <label className="form-label">Vehicle Cost:</label>
-                    <input
-                      name="manualVehicleCost"
-                      type="number"
-                      className="form-input"
-                      placeholder="Enter vehicle cost *"
-                      value={formData.manualVehicleCost}
-                      onChange={handleChange}
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
+                  <div className="form-group cost-row">
+  <label className="form-label">Vehicle Cost:</label>
+  <input
+    name="manualVehicleCost"
+    type="number"
+    className="form-input"
+    value={formData.manualVehicleCost}
+    onChange={handleChange}
+  />
+</div>
+
                 </>
               )}
 
@@ -954,14 +953,7 @@ const BillingPage = () => {
                     placeholder="Enter discount percentage"
                   />
                 </div>
-              </div>
-            </div>
-
-
-            <div className="billing-summary">
-              <h3>EMI Summary</h3>
-              
-              <div className="form-group initial-payment">
+                <div className="form-group initial-payment">
                 <label className="form-label">Initial Payment:</label>
                 <input
                   name="initial"
@@ -973,7 +965,16 @@ const BillingPage = () => {
                   step="0.01"
                 />
               </div>
-              
+              </div>
+            </div>
+
+
+            <div className="billing-summary">
+              <h3>EMI Summary</h3>   
+                <div className="form-group initial-payment"> 
+                  <label className="form-label">Initial Payment:</label> 
+                  <input name="initial" type="number" className="form-input" value={formData.initial} onChange={handleChange} min="0" step="0.01" /> 
+                  </div>        
               <div className="emi-breakdown-grid">
                 <div className="emi-option">
                   <div className="emi-months">12 Months</div>
