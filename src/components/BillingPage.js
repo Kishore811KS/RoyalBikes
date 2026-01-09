@@ -1013,6 +1013,20 @@ const BillingPage = () => {
                 <li>Cheque payments are subject to clearance before delivery.</li>
               </ol>
             </div>
+              <div className="print-only additional-charges">
+                <h3>Invoice Details</h3>
+
+                <div className="charge-row"><span>Road Tax</span><span>₹ </span></div>
+                <div className="charge-row"><span>Insurance</span><span>₹ </span></div>
+                <div className="charge-row"><span>RTO</span><span>₹ </span></div>
+                <div className="charge-row"><span>Fittings</span><span>₹ </span></div>
+                <div className="charge-row"><span>Helmet</span><span>₹ </span></div>
+                <div className="charge-row"><span>Vehicle Cover</span><span>₹ </span></div>
+                <div className="charge-row"><span>Number Plate</span><span>₹ </span></div>
+                <div className="charge-row"><span>Number Plate Frame</span><span>₹ </span></div>
+                <div className="charge-row"><span>RC Book</span><span>₹ </span></div>
+              </div>
+
 
             <div className="billing-documents">
               <h3>Documentation Checklist</h3>

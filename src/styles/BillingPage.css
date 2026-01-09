@@ -266,12 +266,6 @@
   background: #fffbe6;
 }
 
-.billing-summary .form-group.initial-payment input {
-  padding: 8px 10px;
-  border: none;
-  background: #fffbe6;
-  font-weight: bold;
-}
 
 /* ✅ EMI Breakdown Grid */
 .emi-breakdown-grid {
@@ -402,7 +396,7 @@
 .doc-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 3px 8px;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -500,6 +494,10 @@
   border-radius: 6px;
   font-size: 14px;
 }
+.print-only {
+  display: none;
+}
+
 
 @media print {
   * {
@@ -600,6 +598,7 @@
 
   .company-address {
     font-size: 8px;
+    font-family: Arial, Helvetica, sans-serif;
     line-height: 1.3;
     margin: 0 2px;
     text-align: center;
@@ -624,7 +623,8 @@
 
   .billing-contacts div {
     flex: 1;
-    font-size: 9px;
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
     border: 0.5px solid #000;
     padding: 3px 4px;
     text-align: center;
@@ -718,15 +718,12 @@
 .billing-details-wrapper {
   display: flex;
   gap: 8px;              /* 🔽 smaller gap */
-  align-items: flex-start;
+  align-items: stretch;
 }
-
-.vehicle-finance-box {
-  flex: 3;
-}
-
+.vehicle-finance-box,
 .billing-summary {
-  flex: 2;
+  flex: 1 !important;
+  width: 50% !important;
 }
 
 /* Total / Final rows */
@@ -799,7 +796,7 @@
 .vehicle-finance-box h3 {
   margin: 0;
   padding: 8px;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: bold;
   text-transform: uppercase;
   text-align: center;
@@ -811,6 +808,7 @@
   display: grid;
   grid-template-columns: 65% 35%;
   border-bottom: 1px solid #000;
+  min-height: 18px;
 }
 
 /* Left column (Label) */
@@ -831,6 +829,7 @@
   border: none;
   background: #fff;
   text-align: center;
+  font-weight: bold;
   height: auto;          /* 🔥 IMPORTANT */
 }
 
@@ -851,22 +850,11 @@
 
 .vehicle-finance-box input,
 .billing-summary input {
-  border: none !important;
-  outline: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  appearance: none !important;
-  -webkit-appearance: none !important;
-
-  padding: 10px !important;          /* 🔥 removes extra height */
-  margin: 0 !important;
-  height: auto !important;
-
-  text-align: center;
-  font-size: 10px;
-  line-height: 1.2;
+  padding: 2px 4px !important;
+  font-size: 9.5px;
+  line-height: 1.1;
 }
+
 
   .form-group.total-row .form-label,
   .form-group.total-row input {
@@ -882,6 +870,12 @@
   .form-group.initial-payment .form-label {
     border-right: 1px solid #ccc;
   }
+ /* 🔥 FORCE DARK NUMBERS FOR VEHICLE COST ROWS */
+.vehicle-finance-box input {
+  color: #000000 !important;   /* pure black */
+}
+
+
 
   /* .total-cost-box {
     background: #fff;
@@ -909,23 +903,24 @@
   border: 1px solid #000;
   padding: 0;
   min-height: 10px;
+  align-self: flex-start;
 }
 
 .billing-summary h3 {
-    font-size: 12px;
-    text-align: center;
-    margin: 0;
-    border-bottom: 1px solid #000;
-    padding: 8px 10px;
-    text-transform: uppercase;
-    background: white;
-  }
+  font-size: 20px;
+  text-align: center;
+  margin: 0;
+  border-bottom: 1px solid #000;
+  padding: 27px;   /* 🔽 reduced */
+  text-transform: uppercase;
+  background: white;
+}
 
 .emi-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   border-bottom: 1px solid #000;
-  min-height: 10px;      /* 🔥 same as left table */
+  min-height: 18px;      /* 🔥 same as left table */
 }
 
 
@@ -936,15 +931,18 @@
 .emi-months {
   border-right: 1px solid #000;
   padding: 3px 6px;     /* 🔥 reduced */
-  font-size: 10px;
+  font-size: 11px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: bold;
   line-height: 1.2;
 }
 
 
 .emi-amount {
   padding: 3px 6px;     /* 🔥 reduced */
-  font-size: 10px;
+  font-size: 11px;
   font-weight: bold;
+  font-family: Arial, Helvetica, sans-serif;
   text-align: right;
   line-height: 1.2;
 }
@@ -977,26 +975,31 @@
 .billing-summary .form-group.initial-payment .form-label {
   border-right: 1px solid #000;
   font-weight: bold;
-  font-size: 10px;
+  text-align: center;
+  font-size: 11px;
   padding: 6px;
 }
 
 .billing-summary .form-group.initial-payment input {
-  text-align: right;       /* same as EMI amounts */
-  font-weight: bold;     /* remove bold */
-  font-size: 10px;
-  border: none;
-  background: #fff;
-  padding: 6px 8px;
+  border: none !important;
+  background: transparent !important; /* 🔥 removes inner box */
+  box-shadow: none !important;
+  outline: none !important;
+  text-align: right;
+  padding: 6px 8px !important;              /* 🔥 key fix */
+  margin: 0 !important;
+  font-size: 13px;
+  font-weight: bold;
 }
 
 
-.billing-summary .form-group.initial-payment .form-label {
+
+/* .billing-summary .form-group.initial-payment .form-label {
   font-weight: bold;
   text-align: left;
-  font-size: 10px;
+  font-size: 25px;
   padding: 6px 8px;
-}
+} */
 
 
   .emi-breakdown-grid {
@@ -1021,6 +1024,18 @@
   .emi-option:last-child {
     border-bottom: none;
   }
+/* .emi-months {
+  padding: 3px 6px;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.emi-amount {
+  padding: 3px 6px;
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 1.2;
+} */
 
   /* .emi-months {
     font-size: 10px;
@@ -1053,17 +1068,22 @@
     margin-bottom: 4px;
     border-bottom: 0.5px solid #000;
     padding-bottom: 3px;
+    text-align: center;
   }
 
-  .billing-terms ol {
-    margin-left: 16px;
-    padding: 0;
-  }
+.billing-terms ol {
+  margin-left: 16px;
+  padding: 0;
+  font-weight: bold;
+  font-size: 10px;
+}
 
-  .billing-terms li {
-    margin-bottom: 2px;
-    line-height: 1.3;
-  }
+.billing-terms li {
+  margin-bottom: 6px;    /* ✅ space between lines */
+  line-height: 1.5;     /* ✅ better readability */
+  font-weight: bold;
+  font-size: 10px;
+}
 
   /* Documentation Checklist */
   .billing-documents {
@@ -1073,10 +1093,11 @@
   }
 
   .billing-documents h3 {
-    font-size: 11px;
+    font-size: 15px;
     margin-bottom: 5px;
     border-bottom: 0.5px solid #000;
     padding-bottom: 3px;
+    text-align: center;
   }
 
   .doc-grid {
@@ -1089,17 +1110,25 @@
   }
 
   .doc-grid label {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 9px;
-  }
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 0;     /* ✅ vertical spacing */
+  line-height: 1.3;   /* ✅ text spacing */
+}
 
-  .doc-grid input[type="checkbox"] {
-    margin: 0;
-    width: 12px;
-    height: 12px;
-  }
+
+
+ .doc-grid input[type="checkbox"] {
+  margin: 0;
+  width: 13px;
+  height: 13px;
+  padding: 0;          /* 🔥 REMOVE EXTRA SPACE */
+  flex-shrink: 0;      /* keeps checkbox size stable */
+}
+
 
   /* Footer */
   .billing-footer {
@@ -1120,4 +1149,72 @@
     box-shadow: none;
     background: white;
   }
+ /* ===============================
+   PRINT – ADDITIONAL CHARGES (MATCHED HEIGHT)
+================================ */
+
+.print-only { 
+  display: block !important; 
+}
+.additional-charges {
+  flex: 1;
+  border: 0.5px solid #000;
+  padding: 8px;
+  font-size: 10px;
+  box-sizing: border-box;
+  font-weight: bold;
+}
+
+/* Heading – SAME STYLE AS OTHERS */
+/* 🔥 DARK & BOLD INVOICE DETAILS HEADING */
+.additional-charges h3 {
+  font-size: 11px;
+  margin-bottom: 4px;
+  padding-bottom: 3px;
+  text-align: center;
+
+  font-weight: 700;                 /* stronger bold */
+  color: #000000;                   /* pure black */
+  border-bottom: 1.5px solid #000;  /* 🔥 darker line */
+}
+
+
+/* Compact rows like table */
+.charge-row {
+  display: grid;
+  grid-template-columns: 65% 35%;
+  border-bottom: 0.5px solid #000;
+  padding: 2px 4px;          /* 🔥 VERY IMPORTANT */
+  line-height: 1.3;
+  min-height: 16px;          /* 🔥 SAME HEIGHT AS OTHERS */
+}
+/* ✅ Center ₹ symbol in Additional Charges */
+.charge-row span:last-child {
+  display: flex;
+  align-items: left;     /* vertical center */
+  justify-content: left; /* horizontal center */
+  text-align: center;
+  font-weight: bold;
+}
+
+
+.charge-row:last-child {
+  border-bottom: none;
+}
+
+.charge-row span:first-child {
+  font-weight: bold;
+}
+
+/* .charge-row span:last-child {
+  text-align: right;
+} */
+.docs-terms-wrapper {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: stretch; /* 🔥 forces equal height */
+}
+
+
 }
