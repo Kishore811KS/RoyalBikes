@@ -814,7 +814,7 @@
 /* Left column (Label) */
 .vehicle-finance-box .form-label {
   padding: 2px 6px;       /* 🔥 reduced */
-  font-size: 10px;
+  font-size: 13px;
   font-weight: bold;
   border-right: 1px solid #000;
   line-height: 1.2;      /* 🔥 important */
@@ -848,11 +848,13 @@
 
 
 
+/* ✅ VALUE SIZE INCREASE FIX */
 .vehicle-finance-box input,
 .billing-summary input {
-  padding: 2px 4px !important;
-  font-size: 9.5px;
-  line-height: 1.1;
+  font-size: 13px !important;   
+  line-height: 1.2;
+  font-weight: 700;
+  color: #000;
 }
 
 
@@ -911,7 +913,7 @@
   text-align: center;
   margin: 0;
   border-bottom: 1px solid #000;
-  padding: 27px;   /* 🔽 reduced */
+  padding: 33px;   /* 🔽 reduced */
   text-transform: uppercase;
   background: white;
 }
@@ -931,7 +933,7 @@
 .emi-months {
   border-right: 1px solid #000;
   padding: 3px 6px;     /* 🔥 reduced */
-  font-size: 11px;
+  font-size: 15px;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: bold;
   line-height: 1.2;
@@ -940,13 +942,31 @@
 
 .emi-amount {
   padding: 3px 6px;     /* 🔥 reduced */
-  font-size: 11px;
-  font-weight: bold;
+  font-size: 15px;
+  font-weight: bolder;
   font-family: Arial, Helvetica, sans-serif;
   text-align: right;
   line-height: 1.2;
 }
 
+/* FULL HEIGHT CENTER DIVIDER — EMI SUMMARY */
+.billing-summary .emi-row,
+.billing-summary .emi-option,
+.billing-summary .form-group.initial-payment {
+  position: relative;
+}
+
+.billing-summary .emi-row::before,
+.billing-summary .emi-option::before,
+.billing-summary .form-group.initial-payment::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: #000;
+}
 
 
   /* Initial Payment in EMI Summary for Print */
@@ -976,7 +996,7 @@
   border-right: 1px solid #000;
   font-weight: bold;
   text-align: center;
-  font-size: 11px;
+  font-size: 15px;
   padding: 6px;
 }
 
@@ -988,10 +1008,30 @@
   text-align: right;
   padding: 6px 8px !important;              /* 🔥 key fix */
   margin: 0 !important;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: bold;
 }
 
+/* ₹ before Initial Payment value */
+.billing-summary .form-group.initial-payment {
+  position: relative;
+}
+
+.billing-summary .form-group.initial-payment input {
+  padding-left: 15px !important; /* space for ₹ */
+  text-align: right;
+}
+
+.billing-summary .form-group.initial-payment::after {
+  content: "₹";
+  position: absolute;
+  right: 60px;        /* adjust if needed */
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: bold;
+  color: #000;
+  pointer-events: none;
+}
 
 
 /* .billing-summary .form-group.initial-payment .form-label {
@@ -1215,6 +1255,7 @@
   margin-bottom: 10px;
   align-items: stretch; /* 🔥 forces equal height */
 }
+
 
 
 }

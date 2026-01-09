@@ -1014,7 +1014,7 @@ const BillingPage = () => {
               </ol>
             </div>
               <div className="print-only additional-charges">
-                <h3>Invoice Details</h3>
+                <h3>INVOICE DETAILS</h3>
 
                 <div className="charge-row"><span>Road Tax</span><span>₹ </span></div>
                 <div className="charge-row"><span>Insurance</span><span>₹ </span></div>
