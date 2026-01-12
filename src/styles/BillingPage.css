@@ -91,6 +91,7 @@
   font-weight: bold;
   background: #fdfdfd;
   line-height: 1.4;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 /* ⭐ NEW — Number will appear in next line */
@@ -244,6 +245,7 @@
   font-size: 14px;
   line-height: 1.6;
   box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 
@@ -474,6 +476,7 @@
   border: 1px solid #ccc;
   padding: 8px;
   text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .bills-table th {
@@ -738,7 +741,7 @@
 }
 
 .form-group.initial-payment .form-label {
-  border-right: 1px solid #000;
+  border-right: none !important;
 }
 
 
@@ -908,6 +911,7 @@
   align-self: flex-start;
 }
 
+
 .billing-summary h3 {
   font-size: 20px;
   text-align: center;
@@ -931,7 +935,7 @@
 }
 
 .emi-months {
-  border-right: 1px solid #000;
+  /* border-right: 1px solid #000; */
   padding: 3px 6px;     /* 🔥 reduced */
   font-size: 15px;
   font-family: Arial, Helvetica, sans-serif;
@@ -949,17 +953,11 @@
   line-height: 1.2;
 }
 
-/* FULL HEIGHT CENTER DIVIDER — EMI SUMMARY */
-.billing-summary .emi-row,
-.billing-summary .emi-option,
-.billing-summary .form-group.initial-payment {
-  position: relative;
-}
-
 .billing-summary .emi-row::before,
 .billing-summary .emi-option::before,
 .billing-summary .form-group.initial-payment::before {
-  content: "";
+  /* content: none !important; */
+  /* display: none !important; */
   position: absolute;
   top: 0;
   bottom: 0;
@@ -993,7 +991,7 @@
 
 
 .billing-summary .form-group.initial-payment .form-label {
-  border-right: 1px solid #000;
+  /* border-right: 1px solid #000; */
   font-weight: bold;
   text-align: center;
   font-size: 15px;
@@ -1022,15 +1020,12 @@
   text-align: right;
 }
 
-.billing-summary .form-group.initial-payment::after {
-  content: "₹";
-  position: absolute;
-  right: 60px;        /* adjust if needed */
-  top: 50%;
-  transform: translateY(-50%);
-  font-weight: bold;
-  color: #000;
-  pointer-events: none;
+.billing-summary .form-group.initial-payment input {
+  padding-right: 25px !important;
+  text-align: right;
+}
+.billing-summary .form-group.initial-payment {
+  position: relative;
 }
 
 

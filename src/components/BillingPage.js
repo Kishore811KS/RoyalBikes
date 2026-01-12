@@ -193,13 +193,6 @@ const BillingPage = () => {
     return parseFloat(totalEMI.toFixed(2));
   };
 
-  const calculateDiscount = (totalCost, discountPercentage) => {
-    // Apply percentage discount and ensure cost doesn't go negative
-    const discountAmount = (totalCost * discountPercentage) / 100;
-    const discountedCost = Math.max(0, totalCost - discountAmount);
-    return parseFloat(discountedCost.toFixed(2));
-  };
-
   const calculateValues = () => {
     const vehicleCost = useManualEntry
       ? parseFloat(formData.manualVehicleCost) || 0
@@ -212,24 +205,24 @@ const BillingPage = () => {
     const rate = parseFloat(formData.rateOfInterest) || 0;
     const discount = parseFloat(formData.discount) || 0;
 
-    // Step 1: Total cost before discount
-    let totalCost = vehicleCost + rtoCost + fittingCost;
+    // Step 1: Calculate total cost before discount
+    const grossTotal = vehicleCost + rtoCost + fittingCost + documentationCharges;
 
-    // Step 2: Apply discount if present
-    if (discount > 0) {
-      totalCost = calculateDiscount(totalCost, discount);
-    }
+    // Step 2: Apply discount as AMOUNT (₹) - not percentage
+    const totalCost = Math.max(0, grossTotal - discount);
 
     // Step 3: Balance after initial payment
     const balance = Math.max(0, totalCost - initial);
 
     // Step 4: EMI breakdown for different tenures
+    // Note: Documentation charges are now included in the total cost, 
+    // so we don't add them separately in EMI calculation
     const emiBreakdown = {
-      12: calculateEMI(balance, 12, rate, documentationCharges),
-      18: calculateEMI(balance, 18, rate, documentationCharges),
-      24: calculateEMI(balance, 24, rate, documentationCharges),
-      30: calculateEMI(balance, 30, rate, documentationCharges),
-      36: calculateEMI(balance, 36, rate, documentationCharges)
+      12: calculateEMI(balance, 12, rate, 0),
+      18: calculateEMI(balance, 18, rate, 0),
+      24: calculateEMI(balance, 24, rate, 0),
+      30: calculateEMI(balance, 30, rate, 0),
+      36: calculateEMI(balance, 36, rate, 0)
     };
 
     // Step 5: Return safely
@@ -300,11 +293,14 @@ const BillingPage = () => {
       initial: parseFloat(formData.initial) || 0,
       balance: balance,
       rateOfInterest: parseFloat(formData.rateOfInterest) || 0,
+      emiAmount: emiBreakdown[12] || 0,
       emiBreakdown: emiBreakdown,
       documentation: formData.documentation
     };
 
     console.log("Sending data:", billData);
+    console.log("Total Cost:", totalCost);
+    console.log("Discount Amount:", discount);
 
     try {
       if (editingId) {
@@ -370,6 +366,7 @@ const BillingPage = () => {
       documentationCharges: "",
       initial: "",
       rateOfInterest: "",
+      discount: "",
       totalCost: "",
       rtoCost: "",
       documentation: {
@@ -412,6 +409,7 @@ const BillingPage = () => {
       manualVehicleCost: useManual ? bill.vehicleCost.toString() : "",
       fittingCost: bill.fittingCost?.toString() || "",
       documentationCharges: bill.documentationCharges?.toString() || "",
+      discount: bill.discount?.toString() || "",
       initial: bill.initial?.toString() || "",
       rateOfInterest: bill.rateOfInterest?.toString() || "",
       totalCost: bill.totalCost?.toString() || "",
@@ -447,6 +445,7 @@ const BillingPage = () => {
       manualVehicleCost: vehicle.vehicleCost?.toString() || "",
       fittingCost: vehicle.fittingCost?.toString() || "",
       documentationCharges: vehicle.documentationCharges?.toString() || "",
+      discount: vehicle.discount?.toString() || "",
       initial: vehicle.initial?.toString() || "",
       rateOfInterest: vehicle.rateOfInterest?.toString() || "",
       totalCost: vehicle.totalCost?.toString() || "",
@@ -520,6 +519,28 @@ const BillingPage = () => {
     { key: "photo", label: "Photo" },
     { key: "atmcard", label: "ATM Card" }
   ];
+
+  // Helper function to calculate display values
+  const calculateDisplayValues = () => {
+    const vehicleCost = useManualEntry
+      ? parseFloat(formData.manualVehicleCost) || 0
+      : parseFloat(formData.vehicleCost) || 0;
+
+    const fittingCost = parseFloat(formData.fittingCost) || 0;
+    const rtoCost = parseFloat(formData.rtoCost) || 0;
+    const discount = parseFloat(formData.discount) || 0;
+
+    const grossTotal = vehicleCost + fittingCost + rtoCost;
+    const finalTotal = Math.max(0, grossTotal - discount);
+
+    return {
+      grossTotal,
+      finalTotal,
+      discount
+    };
+  };
+
+  const { grossTotal, finalTotal, discount } = calculateDisplayValues();
 
   const renderQuotationsTable = () => (
     <>
@@ -783,14 +804,13 @@ const BillingPage = () => {
 
                   {formData.vehicleBrand && (
                     <div className="form-group no-divider">
-  <label className="form-label">Vehicle Model:</label>
-  <select
-    name="vehicleName"
-    className="form-input"
-    value={formData.vehicleName}
-    onChange={handleChange}
-  >
-
+                      <label className="form-label">Vehicle Model:</label>
+                      <select
+                        name="vehicleName"
+                        className="form-input"
+                        value={formData.vehicleName}
+                        onChange={handleChange}
+                      >
                         <option value="">Select Model *</option>
                         {Object.keys(vehicles[formData.vehicleBrand] || {}).map((model) => (
                           <option key={model} value={model}>
@@ -802,42 +822,39 @@ const BillingPage = () => {
                   )}
 
                   <div className="form-group cost-row">
-  <label className="form-label">Vehicle Cost:</label>
-  <input
-    name="vehicleCost"
-    type="number"
-    className="form-input"
-    value={formData.vehicleCost}
-    readOnly
-  />
-</div>
-
+                    <label className="form-label">Vehicle Cost:</label>
+                    <input
+                      name="vehicleCost"
+                      type="number"
+                      className="form-input"
+                      value={formData.vehicleCost}
+                      readOnly
+                    />
+                  </div>
                 </>
               ) : (
                 <>
                   <div className="form-group no-divider">
-  <label className="form-label">Vehicle Name:</label>
-  <input
-    name="manualVehicleName"
-    type="text"
-    className="form-input"
-    value={formData.manualVehicleName}
-    onChange={handleChange}
-  />
-</div>
-
+                    <label className="form-label">Vehicle Name:</label>
+                    <input
+                      name="manualVehicleName"
+                      type="text"
+                      className="form-input"
+                      value={formData.manualVehicleName}
+                      onChange={handleChange}
+                    />
+                  </div>
 
                   <div className="form-group cost-row">
-  <label className="form-label">Vehicle Cost:</label>
-  <input
-    name="manualVehicleCost"
-    type="number"
-    className="form-input"
-    value={formData.manualVehicleCost}
-    onChange={handleChange}
-  />
-</div>
-
+                    <label className="form-label">Vehicle Cost:</label>
+                    <input
+                      name="manualVehicleCost"
+                      type="number"
+                      className="form-input"
+                      value={formData.manualVehicleCost}
+                      onChange={handleChange}
+                    />
+                  </div>
                 </>
               )}
 
@@ -867,50 +884,36 @@ const BillingPage = () => {
                 />
               </div>
 
+              <div className="form-group total-row">
+                <label className="form-label">
+                  Total Cost (Vehicle + Fitting + RTO):
+                </label>
+                <input
+                  type="text"
+                  readOnly
+                  value={`₹${grossTotal.toLocaleString()}`}
+                />
+              </div>
+
+              {discount > 0 && (
                 <div className="form-group total-row">
-                  <label className="form-label">
-                    Total Cost:
-                  </label>
+                  <label className="form-label">Discount Amount:</label>
                   <input
                     type="text"
                     readOnly
-                    value={`₹${(
-                      parseFloat(formData.vehicleCost || formData.manualVehicleCost || 0) +
-                      parseFloat(formData.fittingCost || 0) +
-                      parseFloat(formData.rtoCost || 0)
-                    ).toLocaleString()}`}
+                    value={`- ₹${discount.toLocaleString()}`}
                   />
                 </div>
+              )}
 
-                {parseFloat(formData.discount || 0) > 0 && (
-                  <div className="form-group total-row">
-                    <label className="form-label">Discount:</label>
-                    <input
-                      type="text"
-                      readOnly
-                      value={`- ₹${parseFloat(formData.discount).toLocaleString()}`}
-                    />
-                  </div>
-                )}
-
-                <div className="form-group total-row">
-                  <label className="form-label">Final Total Cost:</label>
-                  <input
-                    type="text"
-                    readOnly
-                    value={`₹${(
-                      (
-                        parseFloat(formData.vehicleCost || formData.manualVehicleCost || 0) +
-                        parseFloat(formData.fittingCost || 0) +
-                        parseFloat(formData.rtoCost || 0)
-                      ) -
-                      parseFloat(formData.discount || 0)
-                    ).toLocaleString()}`}
-                  />
-                </div>
-
-
-
+              <div className="form-group total-row">
+                <label className="form-label">Final Total Cost:</label>
+                <input
+                  type="text"
+                  readOnly
+                  value={`₹${finalTotal.toLocaleString()}`}
+                />
+              </div>
 
               <div className="no-print">
                 <div className="form-group">
@@ -940,7 +943,7 @@ const BillingPage = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Discount (%):</label>
+                  <label className="form-label">Discount Amount (₹):</label>
                   <input
                     name="discount"
                     type="number"
@@ -948,12 +951,16 @@ const BillingPage = () => {
                     value={formData.discount}
                     onChange={handleChange}
                     min="0"
-                    max="100"
                     step="0.01"
-                    placeholder="Enter discount percentage"
+                    placeholder="Enter discount amount"
                   />
                 </div>
-                <div className="form-group initial-payment">
+              </div>
+            </div>
+
+            <div className="billing-summary">
+              <h3 style={{ textAlign: "center" }}>EMI Summary</h3>
+              <div className="no-print form-group initial-payment">
                 <label className="form-label">Initial Payment:</label>
                 <input
                   name="initial"
@@ -965,16 +972,17 @@ const BillingPage = () => {
                   step="0.01"
                 />
               </div>
-              </div>
-            </div>
+              
+                <div className="print-only">
+                  <div className="form-group initial-payment">
+                    <label className="form-label">Initial Payment:</label>
+                    <span className="form-input">
+                      <strong>₹{parseFloat(formData.initial || 0).toLocaleString()}</strong>
+                    </span>
 
+                  </div>
+                </div>
 
-            <div className="billing-summary">
-              <h3>EMI Summary</h3>   
-                <div className="form-group initial-payment"> 
-                  <label className="form-label">Initial Payment:</label> 
-                  <input name="initial" type="number" className="form-input" value={formData.initial} onChange={handleChange} min="0" step="0.01" /> 
-                  </div>        
               <div className="emi-breakdown-grid">
                 <div className="emi-option">
                   <div className="emi-months">12 Months</div>
@@ -1013,20 +1021,19 @@ const BillingPage = () => {
                 <li>Cheque payments are subject to clearance before delivery.</li>
               </ol>
             </div>
-              <div className="print-only additional-charges">
-                <h3>INVOICE DETAILS</h3>
+            <div className="print-only additional-charges">
+              <h3>INVOICE DETAILS</h3>
 
-                <div className="charge-row"><span>Road Tax</span><span>₹ </span></div>
-                <div className="charge-row"><span>Insurance</span><span>₹ </span></div>
-                <div className="charge-row"><span>RTO</span><span>₹ </span></div>
-                <div className="charge-row"><span>Fittings</span><span>₹ </span></div>
-                <div className="charge-row"><span>Helmet</span><span>₹ </span></div>
-                <div className="charge-row"><span>Vehicle Cover</span><span>₹ </span></div>
-                <div className="charge-row"><span>Number Plate</span><span>₹ </span></div>
-                <div className="charge-row"><span>Number Plate Frame</span><span>₹ </span></div>
-                <div className="charge-row"><span>RC Book</span><span>₹ </span></div>
-              </div>
-
+              <div className="charge-row"><span>Road Tax</span><span>₹ </span></div>
+              <div className="charge-row"><span>Insurance</span><span>₹ </span></div>
+              <div className="charge-row"><span>RTO</span><span>₹ </span></div>
+              <div className="charge-row"><span>Fittings</span><span>₹ </span></div>
+              <div className="charge-row"><span>Helmet</span><span>₹ </span></div>
+              <div className="charge-row"><span>Vehicle Cover</span><span>₹ </span></div>
+              <div className="charge-row"><span>Number Plate</span><span>₹ </span></div>
+              <div className="charge-row"><span>Number Plate Frame</span><span>₹ </span></div>
+              <div className="charge-row"><span>RC Book</span><span>₹ </span></div>
+            </div>
 
             <div className="billing-documents">
               <h3>Documentation Checklist</h3>
@@ -1048,9 +1055,7 @@ const BillingPage = () => {
 
           <div className="billing-footer">
             <p>For ROYAL BIKES</p>
-
           </div>
-
 
           <div className="billing-buttons no-print">
             <button onClick={handleSave} className="billing-btn save-btn">
