@@ -174,24 +174,22 @@ const BillingPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const calculateEMI = (balance, months, rate, documentationCharges) => {
-    // Convert annual rate to monthly rate
-    const monthlyRate = rate / 100 / 12;
+  const calculateEMI = (principal, months, rate) => {
+  const monthlyRate = Number((rate / 100 / 12).toFixed(6));
 
-    // Handle edge case: if interest rate is 0
-    if (monthlyRate === 0) {
-      return parseFloat(((balance + documentationCharges) / months).toFixed(2));
-    }
+  if (monthlyRate === 0) {
+    return +(principal / months).toFixed(2);
+  }
 
-    // Standard EMI formula: P * r * (1+r)^n / ((1+r)^n - 1)
-    const emi = balance * monthlyRate * Math.pow(1 + monthlyRate, months) /
-      (Math.pow(1 + monthlyRate, months) - 1);
+  const emi =
+    (principal *
+      monthlyRate *
+      Math.pow(1 + monthlyRate, months)) /
+    (Math.pow(1 + monthlyRate, months) - 1);
 
-    // Add documentation charges proportionally
-    const totalEMI = emi + (documentationCharges / months);
+  return +emi.toFixed(2);
+};
 
-    return parseFloat(totalEMI.toFixed(2));
-  };
 
   const calculateValues = () => {
     const vehicleCost = useManualEntry
@@ -201,37 +199,38 @@ const BillingPage = () => {
     const fittingCost = parseFloat(formData.fittingCost) || 0;
     const rtoCost = parseFloat(formData.rtoCost) || 0;
     const documentationCharges = parseFloat(formData.documentationCharges) || 0;
+    const discount = parseFloat(formData.discount) || 0;
     const initial = parseFloat(formData.initial) || 0;
     const rate = parseFloat(formData.rateOfInterest) || 0;
-    const discount = parseFloat(formData.discount) || 0;
 
-    // Step 1: Calculate total cost before discount
-    const grossTotal = vehicleCost + rtoCost + fittingCost + documentationCharges;
+    // Calculate gross total including documentation charges
+    const grossTotal = vehicleCost + fittingCost + rtoCost + documentationCharges;
+    
+    // Apply discount to get final total
+    const finalTotal = Math.max(0, grossTotal - discount);
+    
+    // Deduct initial payment to get principal for EMI calculation
+    const principalForEMI = Math.max(0, finalTotal - initial);
 
-    // Step 2: Apply discount as AMOUNT (₹) - not percentage
-    const totalCost = Math.max(0, grossTotal - discount);
-
-    // Step 3: Balance after initial payment
-    const balance = Math.max(0, totalCost - initial);
-
-    // Step 4: EMI breakdown for different tenures
-    // Note: Documentation charges are now included in the total cost, 
-    // so we don't add them separately in EMI calculation
     const emiBreakdown = {
-      12: calculateEMI(balance, 12, rate, 0),
-      18: calculateEMI(balance, 18, rate, 0),
-      24: calculateEMI(balance, 24, rate, 0),
-      30: calculateEMI(balance, 30, rate, 0),
-      36: calculateEMI(balance, 36, rate, 0)
+      12: calculateEMI(principalForEMI, 12, rate),
+      18: calculateEMI(principalForEMI, 18, rate),
+      24: calculateEMI(principalForEMI, 24, rate),
+      30: calculateEMI(principalForEMI, 30, rate),
+      36: calculateEMI(principalForEMI, 36, rate)
     };
 
-    // Step 5: Return safely
     return {
-      totalCost: parseFloat(totalCost.toFixed(2)),
-      balance: parseFloat(balance.toFixed(2)),
-      rate: parseFloat(rate.toFixed(2)),
-      discount: parseFloat(discount.toFixed(2)),
-      documentationCharges: parseFloat(documentationCharges.toFixed(2)),
+      vehicleCost,
+      fittingCost,
+      rtoCost,
+      documentationCharges,
+      discount,
+      initial,
+      rate,
+      grossTotal,
+      finalTotal,
+      principalForEMI,
       emiBreakdown
     };
   };
@@ -270,7 +269,13 @@ const BillingPage = () => {
       return;
     }
 
-    const { totalCost, balance, emiBreakdown, documentationCharges, discount } = calculateValues();
+    const { 
+      finalTotal, 
+      principalForEMI, 
+      emiBreakdown, 
+      documentationCharges, 
+      discount 
+    } = calculateValues();
 
     const vehicleName = useManualEntry ? formData.manualVehicleName : formData.vehicleName;
     const vehicleCost = useManualEntry ? parseFloat(formData.manualVehicleCost) || 0 : parseFloat(formData.vehicleCost) || 0;
@@ -289,9 +294,9 @@ const BillingPage = () => {
       rtoCost: parseFloat(formData.rtoCost) || 0,
       documentationCharges: documentationCharges,
       discount: discount,
-      totalCost: totalCost,
+      totalCost: finalTotal,
       initial: parseFloat(formData.initial) || 0,
-      balance: balance,
+      balance: principalForEMI,
       rateOfInterest: parseFloat(formData.rateOfInterest) || 0,
       emiAmount: emiBreakdown[12] || 0,
       emiBreakdown: emiBreakdown,
@@ -299,7 +304,8 @@ const BillingPage = () => {
     };
 
     console.log("Sending data:", billData);
-    console.log("Total Cost:", totalCost);
+    console.log("Final Total:", finalTotal);
+    console.log("Principal for EMI:", principalForEMI);
     console.log("Discount Amount:", discount);
 
     try {
@@ -509,7 +515,13 @@ const BillingPage = () => {
       vehicle.vehicleName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const { totalCost, balance, emiBreakdown, documentationCharges } = calculateValues();
+  const { 
+    grossTotal, 
+    finalTotal, 
+    discount, 
+    principalForEMI, 
+    emiBreakdown 
+  } = calculateValues();
 
   const documentationChecklist = [
     { key: "aadharcard", label: "Aadhar Card" },
@@ -520,7 +532,7 @@ const BillingPage = () => {
     { key: "atmcard", label: "ATM Card" }
   ];
 
-  // Helper function to calculate display values
+  // Helper function to calculate display values (already covered by calculateValues)
   const calculateDisplayValues = () => {
     const vehicleCost = useManualEntry
       ? parseFloat(formData.manualVehicleCost) || 0
@@ -528,9 +540,10 @@ const BillingPage = () => {
 
     const fittingCost = parseFloat(formData.fittingCost) || 0;
     const rtoCost = parseFloat(formData.rtoCost) || 0;
+    const documentationCharges = parseFloat(formData.documentationCharges) || 0;
     const discount = parseFloat(formData.discount) || 0;
 
-    const grossTotal = vehicleCost + fittingCost + rtoCost;
+    const grossTotal = vehicleCost + fittingCost + rtoCost + documentationCharges;
     const finalTotal = Math.max(0, grossTotal - discount);
 
     return {
@@ -539,8 +552,6 @@ const BillingPage = () => {
       discount
     };
   };
-
-  const { grossTotal, finalTotal, discount } = calculateDisplayValues();
 
   const renderQuotationsTable = () => (
     <>
@@ -886,7 +897,7 @@ const BillingPage = () => {
 
               <div className="form-group total-row">
                 <label className="form-label">
-                  Total Cost (Vehicle + Fitting + RTO):
+                  Total Cost:
                 </label>
                 <input
                   type="text"
@@ -973,15 +984,14 @@ const BillingPage = () => {
                 />
               </div>
               
-                <div className="print-only">
-                  <div className="form-group initial-payment">
-                    <label className="form-label">Initial Payment:</label>
-                    <span className="form-input">
-                      <strong>₹{parseFloat(formData.initial || 0).toLocaleString()}</strong>
-                    </span>
-
-                  </div>
+              {/* <div className="print-only">
+                <div className="form-group initial-payment">
+                  <label className="form-label">Initial Payment:</label>
+                  <span className="form-input">
+                    <strong>₹{parseFloat(formData.initial || 0).toLocaleString()}</strong>
+                  </span>
                 </div>
+              </div> */}
 
               <div className="emi-breakdown-grid">
                 <div className="emi-option">
