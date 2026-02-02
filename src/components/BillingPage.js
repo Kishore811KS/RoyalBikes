@@ -174,66 +174,68 @@ const BillingPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const calculateEMI = (principal, months, rate) => {
-  const monthlyRate = Number((rate / 100 / 12).toFixed(6));
+const calculateEMI = (finalTotal, initial, rate, months) => {
+  if (!finalTotal || !months) return 0;
 
-  if (monthlyRate === 0) {
-    return +(principal / months).toFixed(2);
-  }
+  const principal = Math.max(0, finalTotal - initial);
 
-  const emi =
-    (principal *
-      monthlyRate *
-      Math.pow(1 + monthlyRate, months)) /
-    (Math.pow(1 + monthlyRate, months) - 1);
+  // Interest (your flat interest formula)
+  const interestAmount = (principal * rate) / 100;
 
-  return +emi.toFixed(2);
+  // Total payable
+  const totalPayable = principal + interestAmount;
+
+  // Monthly EMI
+  const emi = totalPayable / months;
+
+  return Number(emi.toFixed(2));
 };
 
 
+
   const calculateValues = () => {
-    const vehicleCost = useManualEntry
-      ? parseFloat(formData.manualVehicleCost) || 0
-      : parseFloat(formData.vehicleCost) || 0;
+  const vehicleCost = useManualEntry
+    ? parseFloat(formData.manualVehicleCost) || 0
+    : parseFloat(formData.vehicleCost) || 0;
 
-    const fittingCost = parseFloat(formData.fittingCost) || 0;
-    const rtoCost = parseFloat(formData.rtoCost) || 0;
-    const documentationCharges = parseFloat(formData.documentationCharges) || 0;
-    const discount = parseFloat(formData.discount) || 0;
-    const initial = parseFloat(formData.initial) || 0;
-    const rate = parseFloat(formData.rateOfInterest) || 0;
+  const fittingCost = parseFloat(formData.fittingCost) || 0;
+  const rtoCost = parseFloat(formData.rtoCost) || 0;
+  const documentationCharges = parseFloat(formData.documentationCharges) || 0;
+  const discount = parseFloat(formData.discount) || 0;
+  const initial = parseFloat(formData.initial) || 0;
+  const rate = parseFloat(formData.rateOfInterest) || 0;
 
-    // Calculate gross total including documentation charges
-    const grossTotal = vehicleCost + fittingCost + rtoCost + documentationCharges;
-    
-    // Apply discount to get final total
-    const finalTotal = Math.max(0, grossTotal - discount);
-    
-    // Deduct initial payment to get principal for EMI calculation
-    const principalForEMI = Math.max(0, finalTotal - initial);
+  // Total cost WITHOUT documentation
+  const grossTotal = vehicleCost + fittingCost + rtoCost;
 
-    const emiBreakdown = {
-      12: calculateEMI(principalForEMI, 12, rate),
-      18: calculateEMI(principalForEMI, 18, rate),
-      24: calculateEMI(principalForEMI, 24, rate),
-      30: calculateEMI(principalForEMI, 30, rate),
-      36: calculateEMI(principalForEMI, 36, rate)
-    };
+  // Final total after discount
+  const finalTotal = Math.max(0, grossTotal - discount);
 
-    return {
-      vehicleCost,
-      fittingCost,
-      rtoCost,
-      documentationCharges,
-      discount,
-      initial,
-      rate,
-      grossTotal,
-      finalTotal,
-      principalForEMI,
-      emiBreakdown
-    };
+  // EMI should include documentation charges
+  const emiBaseTotal = finalTotal + documentationCharges;
+
+  const principalForEMI = Math.max(0, emiBaseTotal - initial);
+
+  const emiBreakdown = {
+  12: calculateEMI(emiBaseTotal, initial, rate, 12),
+  18: calculateEMI(emiBaseTotal, initial, rate, 18),
+  24: calculateEMI(emiBaseTotal, initial, rate, 24),
+  30: calculateEMI(emiBaseTotal, initial, rate, 30),
+  36: calculateEMI(emiBaseTotal, initial, rate, 36),
+};
+
+  return {
+    grossTotal,
+    finalTotal,
+    documentationCharges,
+    discount,
+    initial,
+    rate,
+    emiBaseTotal,
+    principalForEMI,
+    emiBreakdown,
   };
+};
 
   const validateForm = () => {
     if (!formData.customer_name.trim()) {
@@ -543,7 +545,7 @@ const BillingPage = () => {
     const documentationCharges = parseFloat(formData.documentationCharges) || 0;
     const discount = parseFloat(formData.discount) || 0;
 
-    const grossTotal = vehicleCost + fittingCost + rtoCost + documentationCharges;
+    const grossTotal = vehicleCost + fittingCost + rtoCost;
     const finalTotal = Math.max(0, grossTotal - discount);
 
     return {
