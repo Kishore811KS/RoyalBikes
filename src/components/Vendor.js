@@ -1,4 +1,4 @@
-// Updated Vendor.js with better error handling
+// Updated Vendor.js with better error handling and edit functionality
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../styles/Vendor.css";
@@ -10,6 +10,11 @@ const Vendor = () => {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editVehicleName, setEditVehicleName] = useState("");
+  const [editVehiclePrice, setEditVehiclePrice] = useState("");
+  const [editVehicleBrand, setEditVehicleBrand] = useState("");
 
   const brands = [
     "Honda", "Bajaj", "KTM", "Husqvarna", "Hero", 
@@ -79,6 +84,54 @@ const Vendor = () => {
     }
   };
 
+  const handleEdit = (vehicle) => {
+    setEditingId(vehicle.id);
+    setEditVehicleName(vehicle.model);
+    setEditVehiclePrice(vehicle.price);
+    setEditVehicleBrand(vehicle.brand);
+    setShowEditModal(true);
+  };
+
+  const handleUpdate = async () => {
+    if (!editVehicleName || !editVehiclePrice || !editVehicleBrand) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    setLoading(true);
+
+    const updatedVehicle = {
+      brand: editVehicleBrand,
+      model: editVehicleName,
+      price: parseFloat(editVehiclePrice)
+    };
+
+    try {
+      await axios.put(`http://localhost:5000/api/vehicles/${editingId}`, updatedVehicle);
+      alert("Vehicle updated successfully!");
+      setShowEditModal(false);
+      setEditingId(null);
+      setEditVehicleName("");
+      setEditVehiclePrice("");
+      setEditVehicleBrand("");
+      fetchVehicles(); // Refresh the list
+    } catch (error) {
+      console.error("Error updating vehicle:", error);
+      const errorMessage = error.response?.data?.error || "Error updating vehicle";
+      alert(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const closeModal = () => {
+    setShowEditModal(false);
+    setEditingId(null);
+    setEditVehicleName("");
+    setEditVehiclePrice("");
+    setEditVehicleBrand("");
+  };
+
   return (
     <div className="page-container">
       <h2>Vendor Page</h2>
@@ -141,6 +194,12 @@ const Vendor = () => {
               <td>₹{vehicle.price?.toLocaleString()}</td>
               <td>
                 <button 
+                  onClick={() => handleEdit(vehicle)}
+                  className="edit-btn"
+                >
+                  Edit
+                </button>
+                <button 
                   onClick={() => handleDelete(vehicle.id)}
                   className="delete-btn"
                 >
@@ -151,6 +210,54 @@ const Vendor = () => {
           ))}
         </tbody>
       </table>
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Edit Vehicle</h3>
+            <div className="modal-form">
+              <select
+                value={editVehicleBrand}
+                onChange={(e) => setEditVehicleBrand(e.target.value)}
+                required
+              >
+                <option value="">Select Brand *</option>
+                {brands.map((brand) => (
+                  <option key={brand} value={brand}>
+                    {brand}
+                  </option>
+                ))}
+              </select>
+
+              <input
+                type="text"
+                placeholder="Vehicle Model *"
+                value={editVehicleName}
+                onChange={(e) => setEditVehicleName(e.target.value)}
+              />
+              
+              <input
+                type="number"
+                placeholder="Vehicle Price *"
+                value={editVehiclePrice}
+                onChange={(e) => setEditVehiclePrice(e.target.value)}
+                min="0"
+                step="0.01"
+              />
+              
+              <div className="modal-buttons">
+                <button onClick={handleUpdate} className="update-btn" disabled={loading}>
+                  {loading ? "Updating..." : "Update"}
+                </button>
+                <button onClick={closeModal} className="cancel-btn">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
