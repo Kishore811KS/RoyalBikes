@@ -179,8 +179,9 @@ const calculateEMI = (finalTotal, initial, rate, months) => {
 
   const principal = Math.max(0, finalTotal - initial);
 
-  // Interest (your flat interest formula)
-  const interestAmount = (principal * rate) / 100;
+  // Interest scaled by loan duration in years (flat rate)
+  const years = months / 12;
+  const interestAmount = (principal * rate * years) / 100;
 
   // Total payable
   const totalPayable = principal + interestAmount;
